@@ -77,9 +77,12 @@ last_sequence = np.expand_dims(last_sequence, axis=0)
 predicted_scaled = model.predict(last_sequence)
 predicted_values = scaler.inverse_transform(predicted_scaled)[0]
 
-# General alert check
+# Calculate the average value of each symptom over the last 'window_size' days
+average_values = data[symptoms].iloc[-window_size:].mean()
+
+# Alert check: if predicted value is 1.5 times higher than the average historical value for that symptom
 alert_triggered = any(
-    predicted_values[i] > data[symptoms[i]].iloc[-1] * 1.2
+    predicted_values[i] > average_values[symptoms[i]] * 1.5
     for i in range(len(symptoms))
 )
 
@@ -108,5 +111,5 @@ for i, symptom in enumerate(symptoms):
     ax.grid(True)
     ax.legend()
     st.pyplot(fig)
-
+    
 st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
