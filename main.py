@@ -7,14 +7,23 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
-st.title("\U0001F9A0 SwasthyaNet AI - Disease Outbreak Predictor")
+st.title("🧠 SwasthyaNet AI - Disease Outbreak Predictor")
 st.subheader("AI-driven early warning system for infectious disease surveillance")
 
 st.sidebar.header("Simulate or Upload Data")
 data_mode = st.sidebar.radio("Choose Input Mode:", ("Simulate Synthetic Data", "Upload CSV"))
 
-symptoms = ['fever_cases', 'rash_cases', 'platelet_alerts', 'malnutrition_cases', 'conjunctivitis_cases', 'jaundice_cases']
+# Define symptoms to track
+symptoms = [
+    'fever_cases',
+    'rash_cases',
+    'platelet_alerts',
+    'malnutrition_cases',
+    'conjunctivitis_cases',
+    'jaundice_cases'
+]
 
+# Load data
 if data_mode == "Simulate Synthetic Data":
     days = np.arange(30)
     data = pd.DataFrame({
@@ -35,75 +44,65 @@ else:
             st.error(f"Missing columns in uploaded file: {', '.join(missing_cols)}")
             st.stop()
     else:
-        st.warning("Please upload a CSV file with required columns.")
+        st.warning("Please upload a CSV file with columns: 'day', plus all symptom columns.")
         st.stop()
 
-st.write("### Clinical Data Preview:")
+st.write("### Clinical Data Preview")
 st.dataframe(data.head())
 
-# Normalize features
+# Normalize data
 scaler = MinMaxScaler()
 scaled_features = scaler.fit_transform(data[symptoms])
 
-# Create sequences for LSTM (still predicting fever_cases)
+# Create sequences for LSTM
 X, y = [], []
 window_size = 5
 for i in range(len(scaled_features) - window_size):
     X.append(scaled_features[i:i+window_size])
-    y.append(scaled_features[i+window_size][0])  # Predict fever_cases
+    y.append(scaled_features[i+window_size])  # Predict all symptoms
+
 X, y = np.array(X), np.array(y)
 
-# LSTM model
+# Define LSTM model
 model = Sequential()
 model.add(LSTM(50, activation='relu', input_shape=(X.shape[1], X.shape[2])))
-model.add(Dense(1))
+model.add(Dense(len(symptoms)))
 model.compile(optimizer='adam', loss='mse')
 model.fit(X, y, epochs=100, verbose=0)
 
-# Prediction
+# Make prediction for next day
 last_sequence = scaled_features[-window_size:]
 last_sequence = np.expand_dims(last_sequence, axis=0)
 predicted_scaled = model.predict(last_sequence)
-predicted_fever = scaler.inverse_transform(
-    np.concatenate([predicted_scaled, np.zeros((1, len(symptoms)-1))], axis=1)
-)[0][0]
+predicted_values = scaler.inverse_transform(predicted_scaled)[0]
 
-st.success(f"Predicted Fever Cases for Day {int(data['day'].max()) + 1}: {predicted_fever:.2f}")
+# Display predictions
+st.write("### Predicted Symptom Values for Next Day")
+for i, symptom in enumerate(symptoms):
+    st.info(f"**{symptom.replace('_', ' ').title()}**: {predicted_values[i]:.2f}")
 
-# Outbreak alert
-if predicted_fever > data['fever_cases'].iloc[-1] * 1.2:
-    st.error("\U0001F6A8 ALERT: Potential Outbreak Predicted!")
+# Raise alerts for spikes
+alerts = []
+for i, symptom in enumerate(symptoms):
+    if predicted_values[i] > data[symptom].iloc[-1] * 1.2:
+        alerts.append(symptom.replace('_', ' ').title())
+
+if alerts:
+    st.error("🚨 ALERT: Potential Outbreak Detected in: " + ", ".join(alerts))
 else:
-    st.info("\U0001F44D No major outbreak trend detected.")
+    st.success("👍 No major outbreak trend detected.")
 
-# Visualization
-st.write("### Fever Cases vs Predicted")
-fig, ax = plt.subplots()
-ax.plot(data['day'], data['fever_cases'], label='Actual Fever Cases', marker='o')
-ax.plot([data['day'].iloc[-1] + 1], [predicted_fever],
-        label='Predicted Next Day', marker='X', markersize=10, color='red')
-ax.set_xlabel("Day")
-ax.set_ylabel("Fever Cases")
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
-
-# Additional symptom graphs
-symptom_labels = {
-    'malnutrition_cases': "Malnutrition",
-    'conjunctivitis_cases': "Conjunctivitis",
-    'rash_cases': "Rashes",
-    'jaundice_cases': "Jaundice"
-}
-
-st.write("### Symptom Trends")
-for symptom_key, symptom_label in symptom_labels.items():
+# Visualize actual vs predicted
+for i, symptom in enumerate(symptoms):
     fig, ax = plt.subplots()
-    ax.plot(data['day'], data[symptom_key], marker='o')
-    ax.set_title(f"{symptom_label} Over Time")
+    ax.plot(data['day'], data[symptom], label='Actual', marker='o')
+    ax.plot([data['day'].iloc[-1] + 1], [predicted_values[i]], marker='X', markersize=10,
+            color='red', label='Predicted')
+    ax.set_title(f"{symptom.replace('_', ' ').title()} Trend")
     ax.set_xlabel("Day")
-    ax.set_ylabel(symptom_label)
+    ax.set_ylabel("Cases")
     ax.grid(True)
+    ax.legend()
     st.pyplot(fig)
 
 st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
