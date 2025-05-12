@@ -20,7 +20,7 @@ symptoms = [
     'platelet_alerts',
     'malnutrition_cases',
     'conjunctivitis_cases',
-    'jaundice_cases'
+    'high_billirubin'
 ]
 
 # Load data
@@ -33,7 +33,7 @@ if data_mode == "Simulate Synthetic Data":
         'platelet_alerts': np.random.poisson(lam=2, size=30),
         'malnutrition_cases': np.random.poisson(lam=3, size=30),
         'conjunctivitis_cases': np.random.poisson(lam=4, size=30),
-        'jaundice_cases': np.random.poisson(lam=2, size=30),
+        'high_billirubin': np.random.poisson(lam=2, size=30),
     })
 else:
     uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type=["csv"])
