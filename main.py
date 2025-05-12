@@ -89,6 +89,7 @@ alert_triggered = any(
     for i in range(len(symptoms))
 )
 
+# Update the alert condition message based on the prediction
 if alert_triggered:
     st.error("🚨 A disease outbreak may occur!")
 else:
@@ -116,5 +117,6 @@ for i, symptom in enumerate(symptoms):
     st.pyplot(fig)
 
 st.caption("💡 SwasthyaNet AI - Smart Surveillance for a Healthier Future")
+
     
 st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
