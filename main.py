@@ -106,4 +106,4 @@ for symptom_key, symptom_label in symptom_labels.items():
     ax.grid(True)
     st.pyplot(fig)
 
-st.caption("\U0001F4A1 SwasthyaNet AI - Smart Surveillance for a Healthier Future")
+st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
