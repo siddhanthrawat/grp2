@@ -115,8 +115,5 @@ for i, symptom in enumerate(symptoms):
     ax.grid(True)
     ax.legend()
     st.pyplot(fig)
-
-st.caption("💡 SwasthyaNet AI - Smart Surveillance for a Healthier Future")
-
     
 st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
