@@ -77,9 +77,13 @@ last_sequence = np.expand_dims(last_sequence, axis=0)
 predicted_scaled = model.predict(last_sequence)
 predicted_values = scaler.inverse_transform(predicted_scaled)[0]
 
-# Alert check: if predicted value is 120% higher than the last actual value
+# Calculate the difference from the last actual value
+last_actual_values = data[symptoms].iloc[-1].values
+difference = predicted_values - last_actual_values
+
+# Alert condition: If the predicted value exceeds the last actual value by 20% for any symptom
 alert_triggered = any(
-    predicted_values[i] > data[symptoms[i]].iloc[-1] * 1.2
+    difference[i] > last_actual_values[i] * 0.2
     for i in range(len(symptoms))
 )
 
