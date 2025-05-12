@@ -77,16 +77,15 @@ last_sequence = np.expand_dims(last_sequence, axis=0)
 predicted_scaled = model.predict(last_sequence)
 predicted_values = scaler.inverse_transform(predicted_scaled)[0]
 
-# Calculate the standard deviation of the last `window_size` days for each symptom
-std_devs = data[symptoms].iloc[-window_size:].std()
+# Calculate the mean of the last `window_size` days for each symptom
+historical_mean = data[symptoms].iloc[-window_size:].mean()
 
-# Calculate the difference from the last actual value
-last_actual_values = data[symptoms].iloc[-1].values
-difference = predicted_values - last_actual_values
+# Calculate the difference from the historical trend (mean) and the predicted value
+difference = predicted_values - historical_mean
 
-# Alert condition: If the predicted value exceeds the last actual value by 20% AND is greater than 1 std deviation
+# Alert condition: If the predicted value exceeds the historical mean by 35% for any symptom
 alert_triggered = any(
-    difference[i] > last_actual_values[i] * 0.2 and difference[i] > std_devs[i]
+    difference[i] > historical_mean[i] * 0.35
     for i in range(len(symptoms))
 )
 
@@ -114,6 +113,8 @@ for i, symptom in enumerate(symptoms):
     ax.set_ylabel("Cases")
     ax.grid(True)
     ax.legend()
-    st.pyplot(fig)  
+    st.pyplot(fig)
+
+st.caption("💡 SwasthyaNet AI - Smart Surveillance for a Healthier Future")
     
 st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
