@@ -77,13 +77,16 @@ last_sequence = np.expand_dims(last_sequence, axis=0)
 predicted_scaled = model.predict(last_sequence)
 predicted_values = scaler.inverse_transform(predicted_scaled)[0]
 
+# Calculate the standard deviation of the last `window_size` days for each symptom
+std_devs = data[symptoms].iloc[-window_size:].std()
+
 # Calculate the difference from the last actual value
 last_actual_values = data[symptoms].iloc[-1].values
 difference = predicted_values - last_actual_values
 
-# Alert condition: If the predicted value exceeds the last actual value by 20% for any symptom
+# Alert condition: If the predicted value exceeds the last actual value by 20% AND is greater than 1 std deviation
 alert_triggered = any(
-    difference[i] > last_actual_values[i] * 0.2
+    difference[i] > last_actual_values[i] * 0.2 and difference[i] > std_devs[i]
     for i in range(len(symptoms))
 )
 
@@ -111,6 +114,6 @@ for i, symptom in enumerate(symptoms):
     ax.set_ylabel("Cases")
     ax.grid(True)
     ax.legend()
-    st.pyplot(fig)
+    st.pyplot(fig)  
     
 st.caption("\U0001F4A1 Made by Siddhanth,Anish,Diagnta,Adrita & Monalisa")
