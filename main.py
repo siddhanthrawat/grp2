@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
-st.title("🧠 SwasthyaNet AI - Disease Outbreak Predictor")
+st.title("🧠 10. Pandemica - Disease Outbreak Predictor")
 st.subheader("AI-driven early warning system for infectious disease surveillance")
 
 st.sidebar.header("Simulate or Upload Data")
