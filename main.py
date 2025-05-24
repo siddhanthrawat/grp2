@@ -77,16 +77,17 @@ last_sequence = np.expand_dims(last_sequence, axis=0)
 predicted_scaled = model.predict(last_sequence)
 predicted_values = scaler.inverse_transform(predicted_scaled)[0]
 
-
-# Calculate the mean of the last `window_size` days for each symptom
+# Calculate the mean of the last window_size days for each symptom
 historical_mean = data[symptoms].iloc[-window_size:].mean()
 
 # Calculate the difference from the historical trend (mean) and the predicted value
 difference = predicted_values - historical_mean
-ratios = predicted_values / historical_mean
 
 # Alert condition: If the predicted value exceeds the historical mean by 35% for any symptom
-alert_triggered = alert_triggered = np.any(ratios > 1.35)
+alert_triggered = any(
+    difference[i] > historical_mean[i] * 1.35
+    for i in range(len(symptoms))
+)
 
 # Update the alert condition message based on the prediction
 if alert_triggered:
