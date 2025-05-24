@@ -85,7 +85,7 @@ difference = predicted_values - historical_mean
 
 # Alert condition: If the predicted value exceeds the historical mean by 35% for any symptom
 alert_triggered = any(
-    difference[i] > historical_mean[i] * 0.35
+    difference[i] > historical_mean[i] * 1.35
     for i in range(len(symptoms))
 )
 
